@@ -1,15 +1,38 @@
 /*
   ImageApp: 
  */
-import java.awt.Color;
 
 public class ImageApp
 {
+
+  public static Pixel[][] rotate(int degree, Pixel[][] pixels, Pixel[][] originalPixels){
+    Pixel[][] newPixels = pixels;
+    int[][] rotationalArr = {{0, -1}, {1, 0}};
+    Matrix rotationalMatrix = new Matrix(rotationalArr);
+    int degreesremaining = degree;
+    while (degreesremaining >= 90){
+      for (int i = 0; i< pixels.length; i++){
+        for (int j = 0; j< pixels[i].length; j++){
+          int[] tempVector = {j, i};
+          Vector vect1 = new Vector(tempVector);
+          Vector rotated = Matrix.matrixMultiply(vect1, rotationalMatrix);
+          // width: 639
+          //height: 479
+          int newX = rotated.get(0);
+          int newY = rotated.get(1)+145;
+          if (!(newX<0 || newY<0)){newPixels[newY][newX].setColor(originalPixels[i][j].getColor());}
+        }
+      }
+      degreesremaining -= 90;
+    }
+    return newPixels;
+  }
+
   public static void main(String[] args)
   {
 
     // use any file from the lib folder
-    String pictureFile = "lib/beach.jpg";
+    String pictureFile = "lib2/dog.png";
 
     // Get an image, get 2d array of pixels, show a color of a pixel, and display the image
     Picture origImg = new Picture(pictureFile);
@@ -39,6 +62,8 @@ public class ImageApp
     Picture upsidedownImage = new Picture(pictureFile);
     Pixel[][] upsideDownPixels = upsidedownImage.getPixels2D();
 
+    upsideDownPixels = rotate(180,upsideDownPixels, origPixels);
+    upsidedownImage.explore();
     /* to be implemented */
 
     // Image #5 Using the original image and pixels, rotate image 90
@@ -46,8 +71,10 @@ public class ImageApp
     Pixel[][] rotatePixels = rotateImg.getPixels2D();
 
     /* to be implemented */
-
-    // Image #6 Using the original image and pixels, rotate image -90
+    rotatePixels = rotate(90, rotatePixels, origPixels);
+    rotateImg.explore();
+    
+      // Image #6 Using the original image and pixels, rotate image -90
     Picture rotateImg2 = new Picture(pictureFile);
     Pixel[][] rotatePixels2 = rotateImg2.getPixels2D();
 
