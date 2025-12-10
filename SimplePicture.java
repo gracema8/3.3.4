@@ -1,8 +1,8 @@
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.awt.*;
-import java.io.*;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import javax.imageio.ImageIO;
 
 /**
  * A class that represents a simple picture.  A simple picture may have
@@ -415,6 +415,7 @@ public class SimplePicture implements DigitalPicture
   * Method to open a picture explorer on a copy (in memory) of this 
   * simple picture
   */
+
  public void explore()
  {
    // create a copy of the current picture and explore it

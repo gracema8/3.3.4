@@ -12,6 +12,10 @@ public class Matrix {
         return matrix[index];
     }
 
+    public void set(int row, int col, int value){
+        matrix[row][col] = value;
+    }
+
     public int len(){
         return matrix.length;
     }

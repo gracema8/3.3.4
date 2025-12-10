@@ -82,6 +82,10 @@ public class PictureExplorer implements MouseMotionListener, ActionListener, Mou
   
   /** The picture being explored */
   private DigitalPicture picture;
+  /** static reference to the currently open explorer (if any) */
+  private static PictureExplorer currentExplorer = null;
+  /** original buffered image for reset */
+  private BufferedImage originalBufferedImage;
   
   /** The image display */
   private ImageDisplay imageDisplay;
@@ -91,6 +95,10 @@ public class PictureExplorer implements MouseMotionListener, ActionListener, Mou
   
   /** the number system to use, 0 means starting at 0, 1 means starting at 1 */
   private int numberBase=0;
+
+  private int pictureX = 0;
+  private int pictureY = 0;
+
   
   /**
    * Public constructor 
@@ -98,12 +106,37 @@ public class PictureExplorer implements MouseMotionListener, ActionListener, Mou
    */
   public PictureExplorer(DigitalPicture picture)
   {
+    // if there's an existing explorer open, close it first
+    if (currentExplorer != null) {
+      try { currentExplorer.disposeWindow(); } catch (Exception ex) { }
+    }
+
     // set the fields
-    this.picture=picture;
-    zoomFactor=1;
-    
+    this.picture = picture;
+    // store original image for reset
+    if (picture != null) {
+      this.originalBufferedImage = picture.getBufferedImage();
+    }
+    // mark this as the current explorer
+    currentExplorer = this;
+    zoomFactor = 1;
+
     // create the window and set things up
     createWindow();
+  }
+
+  /** Dispose this explorer's window */
+  private void disposeWindow() {
+    if (pictureFrame != null) {
+      try {
+        pictureFrame.dispose();
+      } catch (Exception ex) {
+      }
+      pictureFrame = null;
+    }
+    if (currentExplorer == this) {
+      currentExplorer = null;
+    }
   }
   
   /**
@@ -391,6 +424,70 @@ public class PictureExplorer implements MouseMotionListener, ActionListener, Mou
     
     return colorInfoPanel; 
   }
+
+  /** Create control panel placed under the color picker */
+  private JPanel createControlPanel(Font labelFont) {
+    JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    JLabel actionsLabel = new JLabel("Actions:");
+    actionsLabel.setFont(labelFont);
+    panel.add(actionsLabel);
+
+    JButton rot90 = new JButton("Rotate 90");
+    JButton recolor = new JButton("Cycle RGB");
+    JButton negative = new JButton("Negative");
+    JButton grayScale = new JButton("Grayscale");
+    JButton insert = new JButton("Insert Image");
+
+
+
+    panel.add(rot90);
+    panel.add(grayScale);
+    panel.add(negative);
+    panel.add(recolor);
+    panel.add(insert);
+
+
+    rot90.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        Picture image = ImageApp.getPicture();
+        if (image != null) {
+          image = ImageApp.rotate(90, image.getPixels2D(), image);
+          ImageApp.updateImageAtRuntime(image);
+        }
+      }
+    });
+
+    recolor.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        ImageApp.recolor(ImageApp.getPicture().getPixels2D());
+        ImageApp.updateImageAtRuntime(ImageApp.getPicture());
+      }
+    });
+
+    grayScale.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        ImageApp.grayscale(ImageApp.getPicture().getPixels2D());
+        ImageApp.updateImageAtRuntime(ImageApp.getPicture());
+      }
+    });
+
+    negative.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        ImageApp.negative(ImageApp.getPicture().getPixels2D());
+        ImageApp.updateImageAtRuntime(ImageApp.getPicture());
+      }
+    });
+
+    
+    insert.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        ImageApp.insert(pictureX, pictureY, ImageApp.getPicture().getPixels2D());
+        ImageApp.updateImageAtRuntime(ImageApp.getPicture());
+      }
+    });
+
+    return panel;
+  }
   
   /**
    * Creates the North JPanel with all the pixel location
@@ -408,13 +505,17 @@ public class PictureExplorer implements MouseMotionListener, ActionListener, Mou
     
     // create the pixel location panel
     JPanel locationPanel = createLocationPanel(largerFont);
-    
+
     // create the color information panel
     JPanel colorInfoPanel = createColorInfoPanel(largerFont);
-    
-    // add the panels to the info panel
-    infoPanel.add(BorderLayout.NORTH,locationPanel);
-    infoPanel.add(BorderLayout.SOUTH,colorInfoPanel); 
+
+    // create the control panel under the color picker
+    JPanel controlPanel = createControlPanel(largerFont);
+
+    // add the panels to the info panel (location top, color center, controls bottom)
+    infoPanel.add(BorderLayout.NORTH, locationPanel);
+    infoPanel.add(BorderLayout.CENTER, colorInfoPanel);
+    infoPanel.add(BorderLayout.SOUTH, controlPanel);
     
     // add the info panel
     pictureFrame.getContentPane().add(BorderLayout.NORTH,infoPanel);
@@ -595,8 +696,8 @@ public class PictureExplorer implements MouseMotionListener, ActionListener, Mou
     int cursorY = e.getY();
     
     // get the x and y in the original (not scaled image)
-    int pictureX = (int) (cursorX / zoomFactor + numberBase);
-    int pictureY = (int) (cursorY / zoomFactor + numberBase);
+    pictureX = (int) (cursorX / zoomFactor + numberBase);
+    pictureY = (int) (cursorY / zoomFactor + numberBase);
     
     // display the information for this x and y
     displayPixelInformation(pictureX,pictureY);
