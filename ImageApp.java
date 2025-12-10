@@ -2,6 +2,8 @@
   ImageApp: 
  */
 
+import java.awt.Color;
+
 public class ImageApp
 {
 
@@ -40,23 +42,68 @@ public class ImageApp
     System.out.println(origPixels[0][0].getColor());
     origImg.explore();
 
+
     // Image #1 Using the original image and pixels, recolor an image by changing the RGB color of each Pixel
     Picture recoloredImg = new Picture(pictureFile);
     Pixel[][] recoloredPixels = recoloredImg.getPixels2D();
+   
+      // iterate through each pixel
+      for (Pixel[] recoloredPixel1 : recoloredPixels) {
+          for (Pixel recoloredPixel : recoloredPixel1) {
+              // get RBG values of pixel
+              int red = recoloredPixel.getRed();
+              int green = recoloredPixel.getGreen();
+              int blue = recoloredPixel.getBlue();
+              // rearrage the values for the pixel's RGB
+              recoloredPixel.setColor(new Color(green, blue, red));
+          }
+      }
+    // display image
+    System.out.println(recoloredPixels[0][0].getColor());
+    recoloredImg.explore();
 
-    /* to be implemented */
-
+   
     // Image #2 Using the original image and pixels, create a photographic negative of the image
     Picture negImg = new Picture(pictureFile);
     Pixel[][] negPixels = negImg.getPixels2D();
 
-    /* to be implemented */
+      // iterate through each pixel
+      for (var negPixel1 : negPixels) {
+          for (Pixel negPixel : negPixel1) {
+              // get RBG values of pixel
+              int red = negPixel.getRed();
+              int green = negPixel.getGreen();
+              int blue = negPixel.getBlue();
+              // change the RBG colors to their negative color
+              negPixel.setColor(new Color(255 - red, 255 - green, 255 - blue));
+          }
+      }
+    // display image
+    System.out.println(negPixels[0][0].getColor());
+    negImg.explore();
+
 
     // Image #3 Using the original image and pixels, create a grayscale version of the image
     Picture grayscaleImg = new Picture(pictureFile);
     Pixel[][] grayscalePixels = grayscaleImg.getPixels2D();
 
-    /* to be implemented */
+
+      // iterate through each pixel
+      for (Pixel[] grayscalePixel1 : grayscalePixels) {
+          for (Pixel grayscalePixel : grayscalePixel1) {
+              // get RBG values of pixel
+              int red = grayscalePixel.getRed();
+              int green = grayscalePixel.getGreen();
+              int blue = grayscalePixel.getBlue();
+              int avg = (red + green + blue) / 3;
+              // change the RBG colors to their negative color
+              grayscalePixel.setColor(new Color(avg, avg, avg));
+          }
+      }
+    // display image
+    System.out.println(grayscalePixels[0][0].getColor());
+    grayscaleImg.explore();
+
 
     // Image #4 Using the original image and pixels, rotate it 180 degrees
     Picture upsidedownImage = new Picture(pictureFile);
